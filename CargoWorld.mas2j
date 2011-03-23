@@ -1,0 +1,9 @@
+/* 600 Project */
+
+MAS cargoWorld {
+
+    infrastructure: Centralised
+
+    agents:
+}
+
