@@ -4,8 +4,6 @@ MAS cargoWorld {
 
     infrastructure: Centralised
 
-    environment: ShippingYard
-
     agents:
 }
 
