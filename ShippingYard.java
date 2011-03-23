@@ -20,6 +20,7 @@ public class ShippingYard extends Environment {
        		
 		if (action.getFunctor().equals("move")) {
 			//to-do
+			System.out.println(action.getTerm(0).toString(),action.getTerm(1).toString());
 			return true;
 		}
 		else
