@@ -8,6 +8,5 @@
 
 /* Plans */
 
-+!start : true <- .print("Hi").
++!start : true <- move(box1, truck1).
 
-+onTop(B) : true <- move(B,truck1).  // Just to test
