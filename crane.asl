@@ -3,9 +3,12 @@
 /* Initial beliefs and rules */
 
 /* Initial goals */
+!signIn.
 !clearAll.
 
 /* Plans */
++!signIn: true <- signIn.
+
 +!clearAll: onTop(Box) <- !clear; !clearAll.
 +!clearAll: true <- .print("Done").
 

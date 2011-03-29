@@ -7,5 +7,7 @@ MAS cargoWorld {
     environment: ShippingYard
 
     agents:
+        crane;
+
 }
 
