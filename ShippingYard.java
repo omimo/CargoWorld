@@ -29,10 +29,10 @@ public class ShippingYard extends Environment {
        		
 		Boolean result = false;
 		
-		if (action.getFunctor().equals("move")) {
+		if (action.getFunctor().equals("lift")) {
 			
-			logger.info("move: "+action.getTerm(0).toString()+" > "+action.getTerm(1).toString()); 
-			result = move(action.getTerm(0).toString(),action.getTerm(1).toString());	//Call the move() method to perform the move action								
+			logger.info("lift: "+action.getTerm(0).toString()+" > "+action.getTerm(1).toString()); 
+			result = lift(action.getTerm(0).toString(),action.getTerm(1).toString());	//Call the move() method to perform the move action								
 		}
 		else
 		{
@@ -59,13 +59,13 @@ public class ShippingYard extends Environment {
 		if (!stack1.empty())
 		{
 			Box top = stack1.peek(); //Get the box on the top
-			addPercept(Literal.parseLiteral("box("+top.ID()+","+top.weight()+")")); // So far we just know the info of the top Boxes
+			addPercept(Literal.parseLiteral("weight("+top.ID()+","+top.weight()+")")); // So far we just know the info of the top Boxes
 			addPercept(Literal.parseLiteral("onTop("+top.ID()+")"));
 		}
 	}
 	
 	/* The Move Action */
-	public Boolean move(String box, String truck)
+	public Boolean lift(String box, String truck)
 	{
 		if (((Box)stack1.peek()).ID().equals(box))
 		{			
