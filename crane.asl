@@ -4,10 +4,10 @@
 
 /* Initial goals */
 !signIn.
-!clearAll.
+
 
 /* Plans */
-+!signIn: true <- signIn.
++!signIn: true <- signIn;!clearAll.
 
 +!clearAll: onTop(Box) <- !clear; !clearAll.
 +!clearAll: true <- .print("Done").
