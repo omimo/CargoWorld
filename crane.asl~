@@ -3,11 +3,16 @@
 /* Initial beliefs and rules */
 
 /* Initial goals */
+!signIn.
 
-!start.
 
 /* Plans */
++!signIn: true <- signIn;!clearAll.
 
-+!start : not(onTop(X))<- .print("Done").
++!clearAll: onTop(Box) <- !clear; !clearAll.
++!clearAll: true <- .print("Done").
 
-+onTop(B) : true <- move(B,truck1).  // Just to test
++!clear: lifting(Agent,Box) <- lift(Box,_).
++!clear: onTop(BoxA) & onTop(BoxB) & weight(BoxA, WeightA) & weight(BoxB, WeightB) & WeightA > WeightB <- lift(BoxA,_).
++!clear: onTop(Box) <- lift(Box,_).
+

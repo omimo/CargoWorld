@@ -134,8 +134,9 @@ public class ShippingYard extends Environment {
 				stack1.pop();
 				lifters.remove(top);
 				logger.info("LIFTACT: "+ top.ID() +"  lifted by "+agent);				
-				return true;
+				
 			}
+			return true;
 		}		
 			return false;
 	}
@@ -143,7 +144,7 @@ public class ShippingYard extends Environment {
 	/* Signin Action */
 	public Boolean signin(String ag)
 	{
-		int c = (rnd.nextInt(2) + 1) * 5;		
+		int c = (rnd.nextInt(3) + 1) * 5;		
 		cranes.put(ag,new Crane(ag, c));
 		return true;
 	}
