@@ -42,6 +42,12 @@ public class ShippingYard extends Environment {
 			result = model.signin(agName);							
 		}
 		
+		else if (action.getFunctor().equals("signOut")) {
+			
+			logger.info("Agent: "+agName + "  signed out."); 
+			result = model.signout(agName);							
+		}
+		
 		else
 		{
 			logger.info("executing: "+action+", but not implemented!");
