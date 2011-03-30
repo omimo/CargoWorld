@@ -17,7 +17,7 @@ public class ShippingYard extends Environment {
     public void init(String[] args) {
         super.init(args);
 		
-		model = new WorldModel();
+		model = new WorldModel(Integer.parseInt(args[0]),Integer.parseInt(args[1]),Integer.parseInt(args[2]));
 		view = new WorldView(model);
 		model.setView(view);
 		        

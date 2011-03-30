@@ -4,7 +4,7 @@ MAS cargoWorld {
 
     infrastructure: Centralised
 
-    environment: ShippingYard
+    environment: ShippingYard(5,5,10)  //(#agents,#piles,#boxes_on_each)
 
     agents:
         crane #5;

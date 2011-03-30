@@ -20,8 +20,7 @@ public class ShippingYard extends Environment {
 		model = new WorldModel();
 		view = new WorldView(model);
 		model.setView(view);
-		
-        model.loadTheShip();
+		        
 		updatePercepts();
 		model.printStack();
     }
@@ -41,6 +40,12 @@ public class ShippingYard extends Environment {
 			
 			logger.info("Agent: "+agName + " just signedin."); 
 			result = model.signin(agName);							
+		}
+		
+		else if (action.getFunctor().equals("signOut")) {
+			
+			logger.info("Agent: "+agName + "  signed out."); 
+			result = model.signout(agName);							
 		}
 		
 		else
@@ -65,7 +70,7 @@ public class ShippingYard extends Environment {
 	{		
 		clearPercepts();  // Clear old & invalid percepts 
 		
-		if (Box top: model.getBoxesOnTop())
+		for (Box top: model.getBoxesOnTop())
 		{			
 			addPercept(Literal.parseLiteral("weight("+top.ID()+","+top.weight()+")")); // So far we just know the info of the top Boxes
 			addPercept(Literal.parseLiteral("onTop("+top.ID()+")"));

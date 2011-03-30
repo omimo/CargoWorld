@@ -4,8 +4,9 @@ import java.util.logging.*;
 
 public class WorldModel extends GridWorldModel {
 
-	private static final int NO_OF_STACKS = 5;
-	private static final int NO_OF_BOXES = 10;
+	private static int NO_OF_PILES = 5;
+	private static int NO_OF_BOXES = 10;
+	private static int NO_OF_CRANES = 5;
 	
 	public 	List<Stack<Box>>  piles;	
 	private Random rnd = new Random();
@@ -14,12 +15,15 @@ public class WorldModel extends GridWorldModel {
 	
 	private Logger logger = Logger.getLogger("CargoWorld.mas2j."+ShippingYard.class.getName());		
 	
-	public WorldModel()
+	public WorldModel(int nAg, int nPiles, int nBoxes)
 	{
-		super(NO_OF_STACKS,NO_OF_BOXES,5);
+		super(nPiles,nBoxes,5);
+		NO_OF_PILES = nPiles;
+		NO_OF_BOXES = nBoxes;
+		NO_OF_CRANES = nAg;
 		
 		piles = new ArrayList<Stack<Box>>();
-		for (int i=0;i<NO_OF_STACKS;i++)
+		for (int i=0;i<NO_OF_PILES;i++)
 			piles.add(new Stack<Box>());
 		loadTheShip();
 	}
