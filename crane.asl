@@ -1,18 +1,56 @@
-// Agent Crane in project CargoWorld.mas2j
+/* Initial goal is to clear all boxes */
+!clearAll.
 
-/* Initial beliefs and rules */
+/* Signin (else fail) and clear boxes */
++!clearAll: true <- signIn; !doWork.
++!clearAll: true <- .print("Signin Rejected").
 
-/* Initial goals */
-!signIn.
+/* Not committed yet and box is too heavy therefore reqest help */
++!doWork:
+	not committedTo(_) &
+	onTop(Box) & 
+	weight(Box, WeightA) & 
+	capacity(self, WeightB) &
+	WeightA > WeightB <-
+		+committedTo(Box);
+		+remaining(WeightA-WeightB);
+		.broadcast(tell, help(Box)).
 
+/* Work on what you can */
++!doWork: 
+	onTop(Box) & 
+	weight(Box, WeightA) & 
+	capacity(self, WeightB) &
+	WeightA <= WeightB <- 
+		lift(Box).
 
-/* Plans */
-+!signIn: true <- signIn;!clearAll.
+/* Box on top but too heavy and already committed */
++!doWork: 
+	onTop(Box) & 
+	weight(Box, WeightA) & 
+	capacity(self, WeightB) &
+	WeightA > WeightB <-
+		.print("Waiting on help").
 
-+!clearAll: onTop(Box) <- !clear; !clearAll.
-+!clearAll: true <- .print("Clear All Done").
+/* no Box's should be cleared */
++!doWork: not noTop(Any) <- .print("bye ...").
 
-+!clear: lifting(Agent,Box) <- lift(Box,_).
-+!clear: onTop(BoxA) & onTop(BoxB) & weight(BoxA, WeightA) & weight(BoxB, WeightB) & WeightA > WeightB <- lift(BoxA,_).
-+!clear: onTop(Box) <- lift(Box,_).
-+!clear: true <- .print("Clear Done").
+/* Someone is willing to help and we have enough capasity */
++!help(Box)[source(Agent)]:
+	committedTo(Box) &
+	capacity(Agent, Capacity) &
+	remaining(Remaining) &
+	Capacity >= Remaining <-
+		-remaining(Remaining);
+		-committedTo(Box);
+		lift(Box).
+
+/* Someone is willing to help and we do not have enough capasity */
++!help(Box)[source(Agent)]:
+	committedTo(Box) &
+	capacity(Agent, Capacity) &
+	remaining(Remaining) &
+	Capacity < Remaining <-
+		-remaining(Remaining);
+		+remaining(Remaining-Capacity).
+
