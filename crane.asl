@@ -7,7 +7,7 @@
 +!init: true <-	signIn; !clearAllBoxes; .print("bye...").
 
 +!clearAllBoxes: onTop(_) <- !clearBox; !clearAllBoxes.
-+!clearAllBoxes<-.print("...hi").
++!clearAllBoxes.
 
 +!clearBox:
 	onTop(Box)&
