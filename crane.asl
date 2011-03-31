@@ -1,9 +1,6 @@
-!init.
-/*
-	.broadcast(tell, hello).
-	+hello[source(A)] <- .print("Received hello from ", A).
-*/
+committed(nothing).
 
+!init.
 +!init: true <-	signIn; !clearAllBoxes; .print("bye...").
 
 +!clearAllBoxes: onTop(Box) <- !clearBox; !clearAllBoxes.
@@ -18,9 +15,11 @@
 		lift(Box,_).
 
 +!clearBox:
+	committed(nothing)&
 	onTop(Box)&
 	weight(Box,Weight)&
 	capacity(_self,Capacity)<-
+		-committedTo(nothing);
 		+committedTo(Box);
 		+remaining(Weight-Capacity);
 		.print("Requesting Help");
@@ -30,7 +29,8 @@
 +!clearBox.
 
 +!requestHelp(Box)[source(Requester)]: 
-	not committed(_) <-
+	committedTo(nothing) <-
+		-committedTo(nothing);
 		+committedTo(Box);
 		.print("Offering Help");
 		.send(Requester,tell,offerHelp).
@@ -51,6 +51,7 @@
 		.send(Friend, tell, processHelp);
 		lift(Box,_);
 		-committedTo(_);
+		+committedTo(nothing);
 		-remaining(_).
 
 +!processFriends:
@@ -61,4 +62,5 @@
 
 +!processhelp[source(Reqester)] <-
 	-committedTo(Box);
-	lift(Box).
+	lift(Box);
+	+committedTo(nothing).
