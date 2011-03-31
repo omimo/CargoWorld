@@ -1,57 +1,55 @@
-/* Initial goal is to clear all boxes */
-!clearAll.
+!init.
+/*
+	.broadcast(tell, hello).
+	+hello[source(A)] <- .print("Received hello from ", A).
+*/
 
-/* Signin (else fail) and clear boxes */
-+!clearAll: true <- signIn; !doWork.
-+!clearAll: true <- .print("Signin Rejected").
++!init: true <-	signIn; !clearAllBoxes; .print("bye...").
 
-/* Not committed yet and box is too heavy therefore reqest help */
-+!doWork:
-	not committedTo(_) &
-	onTop(Box) & 
-	weight(Box, WeightA) & 
-	capacity(self, WeightB) &
-	WeightA > WeightB <-
++!clearAllBoxes: onTop(_) <- !clearBox; !clearAllBoxes.
++!clearAllBoxes<-.print("...hi").
+
++!clearBox:
+	onTop(Box)&
+	weight(Box,Weight)&
+	capacity(self,Capacity)&
+	Weight <= Capacity<-
+		lift(Box,_).
+
++!clearBox:
+	onTop(Box)&
+	weight(Box,Weight)&
+	capacity(self,Capacity)<-
 		+committedTo(Box);
-		+remaining(WeightA-WeightB);
-		.broadcast(tell, help(Box)).
+		+remaining(Weight-Capacity);
+		.broadcast(tell, requestHelp(Box)).
 
-/* Work on what you can */
-+!doWork: 
-	onTop(Box) & 
-	weight(Box, WeightA) & 
-	capacity(self, WeightB) &
-	WeightA <= WeightB <- 
-		lift(Box).
++!clearBox.
 
-/* Box on top but too heavy and already committed */
-+!doWork: 
-	onTop(Box) & 
-	weight(Box, WeightA) & 
-	capacity(self, WeightB) &
-	WeightA > WeightB <-
-		.print("Waiting on help").
++!requestHelp(Box)[source(Requester)]: 
+	not committed(_) <-
+		+committedTo(Box);
+		.send(Requester,tell,offerHelp).
 
-/* no Box's should be cleared */
-+!doWork: noTop(Any) <- .print("huh? ...").
-+!doWork: true <- .print("bye ...").
-
-/* Someone is willing to help and we have enough capasity */
-+!help(Box)[source(Agent)]:
-	committedTo(Box) &
-	capacity(Agent, Capacity) &
-	remaining(Remaining) &
-	Capacity >= Remaining <-
-		-remaining(Remaining);
-		-committedTo(Box);
-		lift(Box).
-
-/* Someone is willing to help and we do not have enough capasity */
-+!help(Box)[source(Agent)]:
-	committedTo(Box) &
-	capacity(Agent, Capacity) &
-	remaining(Remaining) &
-	Capacity < Remaining <-
++!offerHelp[source(Friend)]: 
+	remaining(Remaining)&
+	capacity(Friend,Capacity)&
+	Capacity <= Remaining <-
+		+friend(Friend);
 		-remaining(Remaining);
 		+remaining(Remaining-Capacity).
+
++!offerHelp[source(Friend)]:
+	committedTo(Box) <-
+		?processFriends;
+		.send(Friend, tell, processHelp);
+		lift(Box,_);
+		-committedTo(_);
+		-remaining(_).
+
++!processFriends:
+	friend(Friend) <-
+		.send(Friend, tell, processHelp);
+		-friend(Friend);
+		?processFriends.
 
