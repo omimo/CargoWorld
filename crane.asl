@@ -12,7 +12,7 @@ committed(nothing).
 	capacity(_self,Capacity)&
 	Weight <= Capacity<-
 		.print("lifting box");
-		?lift(Box,_).
+		lift(Box,_).
 
 +!clearBox:
 	committed(nothing)&
@@ -50,7 +50,7 @@ committed(nothing).
 		.print("Start Processesing Help");
 		?processFriends;
 		.send(Friend, tell, processHelp);
-		?lift(Box,_);
+		lift(Box,_);
 		-committedTo(_);
 		+committedTo(nothing);
 		-remaining(_).
@@ -63,5 +63,5 @@ committed(nothing).
 
 +!processhelp[source(Reqester)] <-
 	-committedTo(Box);
-	?lift(Box);
+	lift(Box);
 	+committedTo(nothing).
