@@ -159,7 +159,7 @@ public class WorldModel extends GridWorldModel {
 			}
 			return true;
 		}		
-			return false;
+			return true;
 	}
 	
 	/* Signin Action */
