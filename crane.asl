@@ -12,13 +12,14 @@ committed(nothing).
 	capacity(_self,Capacity)&
 	Weight <= Capacity<-
 		.print("lifting box");
-		lift(Box,_).
+		?lift(Box,_).
 
 +!clearBox:
 	committed(nothing)&
 	onTop(Box)&
 	weight(Box,Weight)&
-	capacity(_self,Capacity)<-
+	capacity(_self,Capacity)& 
+	Weight > Capacity <-
 		-committedTo(nothing);
 		+committedTo(Box);
 		+remaining(Weight-Capacity);
@@ -62,5 +63,5 @@ committed(nothing).
 
 +!processhelp[source(Reqester)] <-
 	-committedTo(Box);
-	lift(Box);
+	?lift(Box);
 	+committedTo(nothing).
