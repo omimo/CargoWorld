@@ -12,7 +12,7 @@
 +!clearBox:
 	onTop(Box)&
 	weight(Box,Weight)&
-	capacity(self,Capacity)&
+	capacity(_self,Capacity)&
 	Weight <= Capacity<-
 		.print("lifting box");
 		lift(Box,_).
@@ -20,7 +20,7 @@
 +!clearBox:
 	onTop(Box)&
 	weight(Box,Weight)&
-	capacity(self,Capacity)<-
+	capacity(_self,Capacity)<-
 		+committedTo(Box);
 		+remaining(Weight-Capacity);
 		.print("Requesting Help");
