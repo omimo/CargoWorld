@@ -50,7 +50,7 @@ committed(nothing).
 		.print("Start Processesing Help");
 		?processFriends;
 		.send(Friend, tell, processHelp);
-		lift(Box,_);
+		?lift(Box,_);
 		-committedTo(_);
 		+committedTo(nothing);
 		-remaining(_).
