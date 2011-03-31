@@ -33,7 +33,8 @@
 		.print("Waiting on help").
 
 /* no Box's should be cleared */
-+!doWork: not noTop(Any) <- .print("bye ...").
++!doWork: noTop(Any) <- .print("huh? ...").
++!doWork: true <- .print("bye ...").
 
 /* Someone is willing to help and we have enough capasity */
 +!help(Box)[source(Agent)]:
