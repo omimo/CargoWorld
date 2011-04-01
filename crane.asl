@@ -22,5 +22,12 @@
 	Weight <= Capacity <-
 		lift(Box,_).
 
-+!clear: onTop(Box)<-lift(Box,_).
--!clear: .print("lift failed ... but how?").
++!clear:
+	onTop(Box)<-
+		lift(Box,_);
+		.broadcast(tell, helpWith(Box)).
+
++!helpWith(Box)[source(Agent)]:
+	onTop(Box)<-
+		lift(Box,_).
++!helpWith(Box)[source(Agent)].
