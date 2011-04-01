@@ -1,5 +1,3 @@
-/* 600 Project */
-
 MAS cargoWorld {
 
     infrastructure: Centralised
@@ -8,6 +6,5 @@ MAS cargoWorld {
 
     agents:
         crane #5;
-
 }
 
