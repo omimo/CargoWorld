@@ -13,13 +13,14 @@
 	weight(BoxB,WeightB)&
 	WeightA >= WeightB&
 	WeightA <= Capacity <-
-		lift(BoxA).
+		lift(BoxA,_).
 
 +!clear:
 	onTop(Box)&
 	capacity(_self,Capacity)&
 	weight(Box,Weight)&
 	Weight <= Capacity <-
-		lift(Box).
+		lift(Box,_).
 
-+!clear.
++!clear: onTop(Box)<-lift(Box,_).
+-!clear: .print("lift failed ... but how?").
