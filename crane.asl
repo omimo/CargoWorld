@@ -1,67 +1,25 @@
-committed(nothing).
-
 !init.
-+!init: true <-	signIn; !clearAllBoxes; .print("bye...").
++!init <- signIn; !clearAll; .print("bye...").
 
-+!clearAllBoxes: onTop(Box) <- !clearBox; !clearAllBoxes.
-+!clearAllBoxes.
++!clearAll: onTop(Box) <- !clear; !clearAll.
++!clearAll.
+-!clearAll <- .print("clear failed... continuing"); !clearAll.
 
-+!clearBox:
-	onTop(Box)&
-	weight(Box,Weight)&
++!clear:
 	capacity(_self,Capacity)&
-	Weight <= Capacity<-
-		.print("lifting box");
-		lift(Box,_).
+	onTop(BoxA)&
+	onTop(BoxB)&
+	weight(BoxA,WeightA)&
+	weight(BoxB,WeightB)&
+	WeightA >= WeightB&
+	WeightA <= Capacity <-
+		lift(BoxA).
 
-+!clearBox:
-	committed(nothing)&
++!clear:
 	onTop(Box)&
+	capacity(_self,Capacity)&
 	weight(Box,Weight)&
-	capacity(_self,Capacity)& 
-	Weight > Capacity <-
-		-committedTo(nothing);
-		+committedTo(Box);
-		+remaining(Weight-Capacity);
-		.print("Requesting Help");
-		.broadcast(tell, requestHelp(Box)).
+	Weight <= Capacity <-
+		lift(Box).
 
-+!clearBox: onTop(Box) <- .print("Do nothing").
-+!clearBox.
-
-+!requestHelp(Box)[source(Requester)]: 
-	committedTo(nothing) <-
-		-committedTo(nothing);
-		+committedTo(Box);
-		.print("Offering Help");
-		.send(Requester,tell,offerHelp).
-
-+!offerHelp[source(Friend)]: 
-	remaining(Remaining)&
-	capacity(Friend,Capacity)&
-	Capacity <= Remaining <-
-		.print("Ack Help");
-		+friend(Friend);
-		-remaining(Remaining);
-		+remaining(Remaining-Capacity).
-
-+!offerHelp[source(Friend)]:
-	committedTo(Box) <-
-		.print("Start Processesing Help");
-		?processFriends;
-		.send(Friend, tell, processHelp);
-		lift(Box,_);
-		-committedTo(_);
-		+committedTo(nothing);
-		-remaining(_).
-
-+!processFriends:
-	friend(Friend) <-
-		.send(Friend, tell, processHelp);
-		-friend(Friend);
-		?processFriends.
-
-+!processhelp[source(Reqester)] <-
-	-committedTo(Box);
-	lift(Box);
-	+committedTo(nothing).
++!clear.
