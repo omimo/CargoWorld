@@ -33,7 +33,7 @@ available(100).
 
 // listen to the environment and move box to this truck
 +!move(Crane, BoxName, Truck) : .my_name(Name)
-	<-	Box(BoxName, Weight);
+	<-	weight(BoxName, Weight);
 		!load(BoxName, Weight, Crane).
 	
 //-------------------------------
@@ -50,7 +50,7 @@ available(100).
 
 // is this ever happen?
 +!load(Box, Weight, Sender) : not free
-	<-	.
+	<-	true.
 //	<-	.send(Sender, tell, busy).
 
 +!load(Box, Weight, Sender) : true

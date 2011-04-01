@@ -6,5 +6,7 @@ MAS cargoWorld {
 
     agents:
         crane #5;
+		truck #1;
+		
 }
 
