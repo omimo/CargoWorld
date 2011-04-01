@@ -154,7 +154,8 @@ public class WorldModel extends GridWorldModel {
 				}			
 				
 				lifters.remove(top);
-				logger.info("LIFTACT: "+ top.ID() +"  lifted by "+agent);				
+				logger.info("LIFTACT: "+ top.ID() +"  lifted by "+agent);
+				printStack();
 				
 			}
 			return true;

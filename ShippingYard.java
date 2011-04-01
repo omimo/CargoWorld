@@ -54,7 +54,6 @@ public class ShippingYard extends Environment {
 		}
 		
 		updatePercepts();
-		model.printStack();
 		
         return result;
     }
