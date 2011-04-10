@@ -2,20 +2,20 @@
 left.
 
 // total capacity
-capacity(100).
+truckCapacityWeight(100).
 
 // capacity left (can be negative if overweighted)
-available(100).
+truckAvailableWeight(100).
 
 //-------------------------------
 //	Incoming messages
 //-------------------------------
 
 +tellCapacity[source(Sender)]
-	<-	.send(Sender,tell,capacity(A)).
+	<-	.send(Sender,tell,truckCapacityWeight(A)).
 	
 +tellAvailable[source(Sender)]
-	<-	.send(Sender,tell,available(A)).
+	<-	.send(Sender,tell,truckAvailableWeight(A)).
 	
 // tell me to come to site
 +come[source(Sender)]
@@ -40,7 +40,7 @@ available(100).
 //	Plans
 //-------------------------------
 
-+!leave(Sender) : available(N) & N < 0
++!leave(Sender) : truckAvailableWeight(N) & N < 0
 	<-	.send(Sender,tell,overweight).
 	
 +!leave(Sender) : true
@@ -54,8 +54,8 @@ available(100).
 //	<-	.send(Sender, tell, busy).
 
 +!load(Box, Weight, Sender) : true
-	<-	-available(N);
-		+available(N - Weight);
+	<-	-truckAvailableWeight(N);
+		+truckAvailableWeight(N - Weight);
 		+loaded(Box, Weight).
 //		.send(Sender, tell, loadSuccessful(Box)).
 		
@@ -65,5 +65,5 @@ available(100).
 		
 +!unload(Box, Sender) : true
 	<-	loaded(Box,Weight);
-		-available(N);
-		+available(N + Weight).
+		-truckAvailableWeight(N);
+		+truckAvailableWeight(N + Weight).
