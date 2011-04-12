@@ -38,22 +38,6 @@ truckMinWeight(5);
 // ???
 // -!clearAll <- .print("clear failed... continuing"); !clearAll.
 
-
-//-------------------------------------
-// box I was working on got lifted
-
-// I'm the first lifter / select truck
-+!boxLifted(BoxA) : waitToMove(BoxA)	
-	truck(Truck) &
-	.send(Truck, tell, tellAvailable) &
-	truckAvailable(Truck, AvailableWeight) &
-	weight(Box, BoxWeight) &
-	BoxWeight <= AvailableWeight
-	<-	!moving(Box, Truck).
-
-// Other lifters waits
-+!boxLifted(BoxA).
-		
 		
 //-------------------------------------
 // lift heavy box that is under my's capacity
@@ -88,14 +72,33 @@ truckMinWeight(5);
 
 
 //-------------------------------------
+// box I was working on got lifted
+
+// I'm the first lifter / select truck
++!boxLifted(BoxA) : waitToMove(BoxA)	
+	truck(Truck) &
+	.send(Truck, tell, tellAvailable) &
+	truckAvailable(Truck, AvailableWeight) &
+	weight(Box, BoxWeight) &
+	BoxWeight <= AvailableWeight
+	<-	!moving(Box, Truck).
+
+// Other lifters waits
++!boxLifted(BoxA).
+		
+
+//-------------------------------------
 // moving box to truck
 +!moving(Box, Truck) : not onSite(Truck)
-	<-	.send(Truck, tell, come);
+	<-	.send(Truck, tell, move(_self, Box, Truck));
+		.send(Truck, tell, come);
 		moveAndDrop(Box, Truck).
 		
 +!moving(Box, Truck)
-	<-	moveAndDrop(Box, Truck).
+	<-	.send(Truck, tell, move(_self, Box, Truck));
+		moveAndDrop(Box, Truck).
 	
+
 
 //-------------------------------------
 // others need help

@@ -12,10 +12,10 @@ truckAvailableWeight(100).
 //-------------------------------
 
 +tellCapacity[source(Sender)]
-	<-	.send(Sender,tell,truckCapacityWeight(A)).
+	<-	.send(Sender,tell,truckCapacityWeight(_self, A)).
 	
 +tellAvailable[source(Sender)]
-	<-	.send(Sender,tell,truckAvailableWeight(A)).
+	<-	.send(Sender,tell,truckAvailableWeight(_self, A)).
 	
 // tell me to come to site
 +come[source(Sender)]
@@ -32,7 +32,7 @@ truckAvailableWeight(100).
 //-------------------------------
 
 // listen to the environment and move box to this truck
-+!move(Crane, BoxName, Truck) : .my_name(Name)
++!move(Crane, BoxName, _self) : .my_name(Name)
 	<-	weight(BoxName, Weight);
 		!load(BoxName, Weight, Crane).
 	
