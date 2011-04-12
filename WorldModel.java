@@ -122,7 +122,7 @@ public class WorldModel extends GridWorldModel {
 /* Actions */
 
 /* The Move Action */
-	public Boolean lift(String agent, String box, String truck)
+	public Boolean lift(String agent, String box/*, String truck*/)
 	{				
 		Boolean exists = false;
 		

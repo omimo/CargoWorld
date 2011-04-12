@@ -1,4 +1,5 @@
-truckMinWeight(5);
+// tell truck leave if availble weight is below this
+truckMinWeight(5).
 
 !init.
 +!init <- 
@@ -75,9 +76,9 @@ truckMinWeight(5);
 // box I was working on got lifted
 
 // I'm the first lifter / select truck
-+!boxLifted(BoxA) : waitToMove(BoxA)	
-	truck(Truck) &
-	.send(Truck, tell, tellAvailable) &
++!boxLifted(BoxA) : waitToMove(BoxA) &
+	onSite(Truck) &
+	askTruckCapacity(Truck) &
 	truckAvailable(Truck, AvailableWeight) &
 	weight(Box, BoxWeight) &
 	BoxWeight <= AvailableWeight
@@ -85,6 +86,9 @@ truckMinWeight(5);
 
 // Other lifters waits
 +!boxLifted(BoxA).
+
++!askTruckCapacity(Truck)
+	<-	?truckAvailable(Truck, AvailableWeight).
 		
 
 //-------------------------------------
@@ -121,7 +125,8 @@ truckMinWeight(5);
 //tell truck to leave
 +!reset(Box) : 
 	waitToMove(Box) &
-	.send(Truck, tell, tellAvailable) &
+	onSite(Truck) &
+	askTruckCapacity(Truck) &
 	truckAvailableWeight(Truck, Weight) &
 	truckMinWeight(MinWeight) &
 	MinWeight >= Weight

@@ -32,8 +32,12 @@ public class ShippingYard extends Environment {
 		
 		if (action.getFunctor().equals("lift")) {
 			
-			logger.info(agName+ ": lift: "+action.getTerm(0).toString()+" > "+action.getTerm(1).toString()); 
-			result = model.lift(agName,action.getTerm(0).toString(),action.getTerm(1).toString());	//Call the move() method to perform the move action								
+			// logger.info(agName+ ": lift: "+action.getTerm(0).toString()+" > "+action.getTerm(1).toString()); 
+			// result = model.lift(agName,action.getTerm(0).toString(),action.getTerm(1).toString());	//Call the move() method to perform the move action				
+			//~ Modified by Pai
+			// 2nd parameter removed
+			logger.info(agName+ ": lift: "+action.getTerm(0).toString()); 
+			result = model.lift(agName,action.getTerm(0).toString());	//Call the move() method to perform the move action	
 		}
 		
 		else if (action.getFunctor().equals("signIn")) {

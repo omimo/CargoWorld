@@ -5,7 +5,7 @@ MAS cargoWorld {
     environment: ShippingYard(5,5,10)  //(#agents,#piles,#boxes_on_each)
 
     agents:
-        crane2 #5;
+        crane #5;
 		truck #3;
 		
 }
