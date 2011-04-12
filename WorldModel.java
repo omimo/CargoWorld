@@ -13,6 +13,9 @@ public class WorldModel extends GridWorldModel {
 	private HashMap<String,Crane> cranes = new HashMap<String,Crane>();
 	private HashMap<Box,Vector<Crane>> lifters = new HashMap<Box,Vector<Crane>>(); 
 	
+	private HashMap<String,Truck> trucks = new HashMap<String,Truck>();
+	private HashMap<String,String> trucksOnSite = new HashMap<String,String>();
+	
 	private Logger logger = Logger.getLogger("CargoWorld.mas2j."+ShippingYard.class.getName());		
 	
 	public WorldModel(int nAg, int nPiles, int nBoxes)
@@ -36,6 +39,16 @@ public class WorldModel extends GridWorldModel {
 	public Collection<Crane> getCranes()
 	{
 		return cranes.values();	
+	}
+	
+	public Collection<Truck> getTrucks()
+	{
+		return trucks.values();	
+	}
+	
+	public Collection<String> getTrucksOnSite()
+	{
+		return trucksOnSite.values();	
 	}
 	
 	public Vector<Crane> getLiftersOf(Box b)
@@ -163,19 +176,50 @@ public class WorldModel extends GridWorldModel {
 			return true;
 	}
 	
-	/* Signin Action */
-	public Boolean signin(String ag)
+	/* Signin Actions */
+	public Boolean signin(String ag)  // Crane
 	{
 		int c = (rnd.nextInt(3) + 1) * 5;		
 		cranes.put(ag,new Crane(ag, c));
 		return true;
 	}	
 	
+	public Boolean signin(String truck, String capacity)  // Truck
+	{			
+		trucks.put(truck,new Truck(truck, Integer.parseInt(capacity)));
+		return true;
+	}
+	
 	/* Signout Action */
 	public Boolean signout(String ag)
 	{
-		cranes.remove(ag);
+		if (ag.contains("crane")) 
+			cranes.remove(ag);
+		else if (ag.contains("truck"))
+			trucks.remove(ag);
+		else 
+			return false;
 		return true;
 	}	
 	
+	/* moveAndDrop Action */
+	public Boolean moveAndDrop(String ag,String box, String truck)
+	{
+		//cranes.remove(ag);
+		return true;
+	}
+
+	/* truckArrive Action */
+	public Boolean truckArrive(String truck)
+	{
+		trucksOnSite.put(truck,truck);
+		return true;
+	}
+
+	/* truckLeave Action */
+	public Boolean truckLeave(String truck)
+	{
+		trucksOnSite.remove(truck);
+		return true;
+	}	
 }
