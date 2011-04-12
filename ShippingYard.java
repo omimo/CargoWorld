@@ -39,13 +39,34 @@ public class ShippingYard extends Environment {
 		else if (action.getFunctor().equals("signIn")) {
 			
 			logger.info("Agent: "+agName + " just signedin."); 
-			result = model.signin(agName);							
+			if (agName.contains("truck"))
+				result = model.signin(agName,action.getTerm(0).toString());
+			else
+				result = model.signin(agName);							
 		}
 		
 		else if (action.getFunctor().equals("signOut")) {
 			
 			logger.info("Agent: "+agName + "  signed out."); 
 			result = model.signout(agName);							
+		}
+		
+		else if (action.getFunctor().equals("moveAndDrop")) {
+			
+			logger.info("Agent: "+agName + "  moveAndDrop( "+ action.getTerm(0).toString()+" , "+action.getTerm(1).toString()+" )"); 
+			result = model.moveAndDrop(agName,action.getTerm(0).toString(),action.getTerm(1).toString());							
+		}
+		
+		else if (action.getFunctor().equals("truckArrive")) {
+			
+			logger.info("Truck: "+agName + " arrived to the site"); 
+			result = model.truckArrive(agName);							
+		}
+		
+		else if (action.getFunctor().equals("truckLeave")) {
+			
+			logger.info("Truck: "+agName + " left to the site"); 
+			result = model.truckLeave(agName);							
 		}
 		
 		else
@@ -69,19 +90,28 @@ public class ShippingYard extends Environment {
 	{		
 		clearPercepts();  // Clear old & invalid percepts 
 		
-		for (Box top: model.getBoxesOnTop())
+		for (Box top: model.getBoxesOnTop()) //weight(BoxID,Weight) , onTop(BoxID)
 		{			
 			addPercept(Literal.parseLiteral("weight("+top.ID()+","+top.weight()+")")); // So far we just know the info of the top Boxes
 			addPercept(Literal.parseLiteral("onTop("+top.ID()+")"));
 		}
 				
-		for (Crane c : model.getCranes())
+		for (Crane c : model.getCranes()) // capacity(CraneID,Capacity)
 		{			
 			addPercept(Literal.parseLiteral("capacity("+c.ID()+","+ c.capacity()+")"));
 		}			
 		
+		for (Truck t : model.getTrucks()) // capacity(TruckID,Capacity)
+		{			
+			addPercept(Literal.parseLiteral("capacity("+t.ID()+","+ t.capacity()+")"));
+		}
 		
-		for (Box b : model.getLiftBoxes())
+		for (String t : model.getTrucksOnSite()) // onSite(TruckID)
+		{			
+			addPercept(Literal.parseLiteral("onSite("+t+")"));
+		}
+		
+		for (Box b : model.getLiftBoxes()) 
 		{			
 				for (Crane c : model.getLiftersOf(b))
 					addPercept(Literal.parseLiteral("lifting("+c.ID()+","+b.ID()+")"));

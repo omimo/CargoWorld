@@ -1,29 +1,21 @@
-import jason.asSemantics.Agent;
+public class Truck {
+	private int capacity;
+	private String ID;
+	private static int nextID = 0;
 
-/**
- * The truck agent class
- *
- */
-public class Truck
-		extends Agent {
-	private static int    nextID = 0;
-	private final Integer ID;
-	private final Integer weight;
-
-	public Truck(Integer weight) {
-		ID          = nextID++;
-		this.weight = weight;
+	public Truck(String tr, int w)
+	{
+		ID = tr;
+		capacity = w;
 	}
-
-	public Integer getID() {
+	
+	public int capacity()
+	{
+		return capacity;
+	}
+	
+	public String ID()
+	{
 		return ID;
-	}
-
-	public Integer getWeight() {
-		return weight;
-	}
-
-	public String getName() {
-		return "truck"+ID;
 	}
 }

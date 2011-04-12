@@ -7,6 +7,10 @@ truckCapacityWeight(100).
 // capacity left (can be negative if overweighted)
 truckAvailableWeight(100).
 
+// Signing in - added by Omid
+!init.
++!init <- ?truckCapacityWeight(C);signIn(C).
+
 //-------------------------------
 //	Incoming messages
 //-------------------------------
