@@ -179,7 +179,8 @@ public class WorldModel extends GridWorldModel {
 	/* Signin Actions */
 	public Boolean signin(String ag)  // Crane
 	{
-		int c = (rnd.nextInt(3) + 1) * 5;		
+		//int c = (rnd.nextInt(3) + 1) * 5;	
+		int c = (rnd.nextInt(3) + 1) * 50; // made it large for testing - Pai	
 		cranes.put(ag,new Crane(ag, c));
 		return true;
 	}	

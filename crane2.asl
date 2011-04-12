@@ -4,40 +4,49 @@ truckMinWeight(5).
 !init.
 +!init <- 
 	signIn;
-	!clearAll; 
+	!clearAll;
 	.print("bye...").
+	
++!clearAll: onTop(Box) <- !clear; !clearAll.
++!clearAll.
+-!clearAll <- .print("clear failed... continuing"); !clearAll.
 
 //-------------------------------------
 // update box info so that I can continue to work on other boxes
-+!clearAll:
++!clear:
 	workingOn(Box) &
 	onTruck(Box)
-	<-	reset(Box).
+	<-	
+	.print("clear-update");
+		reset(Box).
 
 // see if I can help someone
-+!clearAll:
++!clear:
 	not workingOn(_) &
 	helpWith(Box)
-	<-	!helpWith(Box);
-		clearAll.
+	<-
+	.print("clear-help");
+		!helpWith(Box).
 
 // try lifting
-+!clearAll: 
++!clear: 
 	not workingOn(_) &
 	onTop(Box)
-	<-	!lifting;
-		!clearAll.
+	<-	
+	.print("clear-lift");
+		!lifting.
 
 // after lifted (will continue to work after box loaded on truck)
-+!clearAll: 
++!clear: 
 	workingOn(BoxA) &
 	lifted(BoxA)
-	<-	!boxLifted(BoxA).
+	<-	
+	.print("clear-post-lift");
+		!boxLifted(BoxA).
 
-+!clearAll.
-
-// ???
-// -!clearAll <- .print("clear failed... continuing"); !clearAll.
+// nothing to do in this cycle. wait
++!clear: onTop(_).
+	
 
 		
 //-------------------------------------
@@ -50,7 +59,9 @@ truckMinWeight(5).
 	weight(BoxB,WeightB) &
 	WeightA >= WeightB &
 	WeightA <= Capacity
-	<-	+workingOn(BoxA);
+	<-	
+	.print("lifting-2box");
+		+workingOn(BoxA);
 		+waitToMove(BoxA);
 		lift(BoxA).
 
@@ -60,13 +71,17 @@ truckMinWeight(5).
 	onTop(BoxA) &
 	weight(BoxA,WeightA) &
 	WeightA <= Capacity
-	<-	+workingOn(BoxA);
+	<-	
+	.print("lifting-1box");
+		+workingOn(BoxA);
 		+waitToMove(BoxA);
 		lift(BoxA).
 
 // ask other's help
 +!lifting: onTop(Box) 
-	<-	+workingOn(BoxA);
+	<-	
+	.print("lifting-help");
+		+workingOn(BoxA);
 		lift(Box);
 		.broadcast(tell, helpWith(Box)).
 
@@ -82,24 +97,33 @@ truckMinWeight(5).
 	truckAvailable(Truck, AvailableWeight) &
 	weight(Box, BoxWeight) &
 	BoxWeight <= AvailableWeight
-	<-	!moving(Box, Truck).
+	<-	
+	.print("postLift-mover");
+		!moving(Box, Truck).
 
 // Other lifters waits
-+!boxLifted(BoxA).
++!boxLifted(BoxA) <-
+	.print("postLift-helper").
 
 +!askTruckCapacity(Truck)
-	<-	?truckAvailable(Truck, AvailableWeight).
+	<-	
+	.print("postLift-capacity?");
+		?truckAvailable(Truck, AvailableWeight).
 		
 
 //-------------------------------------
 // moving box to truck
 +!moving(Box, Truck) : not onSite(Truck)
-	<-	.send(Truck, tell, move(_self, Box, Truck));
+	<-	
+	.print("move-!onSite");
+		.send(Truck, tell, move(_self, Box, Truck));
 		.send(Truck, tell, come);
 		moveAndDrop(Box, Truck).
 		
 +!moving(Box, Truck)
-	<-	.send(Truck, tell, move(_self, Box, Truck));
+	<-	
+	.print("move-onSite");
+		.send(Truck, tell, move(_self, Box, Truck));
 		moveAndDrop(Box, Truck).
 	
 
@@ -111,12 +135,16 @@ truckMinWeight(5).
 +!helpWith(Box) :
 	not workingOn(_) &
 	onTop(Box)
-	<-	-helpWith(Box);
+	<-	
+	.print("help-availble");
+		-helpWith(Box);
 		+workingOn(Box);
 		lift(Box).
 		
 // I'm busy. Offer help later
-+!helpWith(Box)[source(Agent)].
++!helpWith(Box)[source(Agent)]
+	<-
+	.print("help-busy").
 
 
 //-------------------------------------
