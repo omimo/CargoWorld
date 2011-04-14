@@ -8,9 +8,12 @@ public class WorldModel extends GridWorldModel {
 	private static int NO_OF_BOXES = 10;
 	private static int NO_OF_CRANES = 5;
 	
-	public 	List<Stack<Box>>  piles;	
 	private Random rnd = new Random();
+		
+	private List<Stack<Box>>  piles;	
 	private HashMap<String,Crane> cranes = new HashMap<String,Crane>();
+	
+	private ArrayList<Box> liftedBoxes = new ArrayList<Box>();
 	private HashMap<Box,Vector<Crane>> lifters = new HashMap<Box,Vector<Crane>>(); 
 	
 	private HashMap<String,Truck> trucks = new HashMap<String,Truck>();
@@ -59,6 +62,11 @@ public class WorldModel extends GridWorldModel {
 	public Set<Box> getLiftBoxes()
 	{
 		return lifters.keySet();
+	}
+	
+	public ArrayList<Box> getLiftedBoxes()
+	{
+		return liftedBoxes;
 	}
 	
 	public Set<Box> getBoxesOnTop()
@@ -163,7 +171,7 @@ public class WorldModel extends GridWorldModel {
 				{
 					Stack<Box> st = iter.next();
 					if (!st.empty() && st.peek().ID().equals(box))
-						st.pop();
+						liftedBoxes.add(st.pop());
 				}			
 				
 				lifters.remove(top);
