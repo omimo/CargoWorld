@@ -2,10 +2,10 @@ MAS cargoWorld {
 
     infrastructure: Centralised
 
-    environment: ShippingYard(5,5,10)  //(#agents,#piles,#boxes_on_each)
+    environment: ShippingYard(5,3,5,10,1000)  //(#agents,#trucks,#piles,#boxes_on_each,#sleepdelay)
 
     agents:
-        crane2 #5;
+        crane #5;
 		truck #3;
 		
 }

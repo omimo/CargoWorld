@@ -17,18 +17,24 @@ public class ShippingYard extends Environment {
     public void init(String[] args) {
         super.init(args);
 		
-		model = new WorldModel(Integer.parseInt(args[0]),Integer.parseInt(args[1]),Integer.parseInt(args[2]));
+		model = new WorldModel(Integer.parseInt(args[0]),Integer.parseInt(args[1]),
+							   Integer.parseInt(args[2]),Integer.parseInt(args[3]),
+							   Integer.parseInt(args[4]));
 		view = new WorldView(model);
 		model.setView(view);
 		        
 		updatePercepts();
-		model.printStack();
+		//model.printStack();
     }
 
     @Override
     synchronized public boolean executeAction(String agName, Structure action) {
        		
 		Boolean result = false;
+		
+		try {	
+			Thread.sleep(20);
+		} catch (Exception e){ }
 		
 		if (action.getFunctor().equals("lift")) {
 			
@@ -79,7 +85,6 @@ public class ShippingYard extends Environment {
 		}
 		
 		updatePercepts();
-		
         return result;
     }
 
@@ -114,7 +119,7 @@ public class ShippingYard extends Environment {
 		{			
 			addPercept(Literal.parseLiteral("onSite("+t+")"));
 		}
-		
+	
 		for (Box b : model.getLiftBoxes())  // Who is lifting what! 
 		{			
 				for (Crane c : model.getLiftersOf(b))
@@ -129,9 +134,5 @@ public class ShippingYard extends Environment {
 	}
 	
 	
-	
-	
-	
-
 }
 

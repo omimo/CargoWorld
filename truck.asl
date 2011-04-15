@@ -16,7 +16,7 @@ truckAvailableWeight(100).
 !init.
 +!init 
 	<-	?truckCapacityWeight(Weight);
-		signIn(Weight).
+		signIn(Weight);truckArrive.
 
 //-------------------------------
 //	Incoming messages

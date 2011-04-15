@@ -4,13 +4,20 @@ import java.util.logging.*;
 
 public class WorldModel extends GridWorldModel {
 
-	private static int NO_OF_PILES = 5;
-	private static int NO_OF_BOXES = 10;
-	private static int NO_OF_CRANES = 5;
+    public static final int   BOX = 32;
+    public static final int   PLATE = 64;
+	public static final int   TRUCK = 128;
+	
+	public static int sleep = 200;
+	
+	public static int NO_OF_PILES = 5;
+	public static int NO_OF_BOXES = 10;
+	public static int NO_OF_CRANES = 5;
+	public static int NO_OF_TRUCKS = 3;
 	
 	private Random rnd = new Random();
-		
-	private List<Stack<Box>>  piles;	
+			
+	private ArrayList<Stack<Box>>  piles;	
 	private HashMap<String,Crane> cranes = new HashMap<String,Crane>();
 	
 	private ArrayList<Box> liftedBoxes = new ArrayList<Box>();
@@ -21,17 +28,33 @@ public class WorldModel extends GridWorldModel {
 	
 	private Logger logger = Logger.getLogger("CargoWorld.mas2j."+ShippingYard.class.getName());		
 	
-	public WorldModel(int nAg, int nPiles, int nBoxes)
+	private Object[][] labels;
+	
+	public WorldModel(int nAg, int nTrucks, int nPiles, int nBoxes,int sl)
 	{
-		super(nPiles,nBoxes,5);
+		super(nPiles+nAg*2,nBoxes+nAg*2+2,nAg);
 		NO_OF_PILES = nPiles;
 		NO_OF_BOXES = nBoxes;
-		NO_OF_CRANES = nAg;
+		NO_OF_CRANES = nAg;		
+		NO_OF_TRUCKS = nTrucks;
+		sleep = sl;
+		
+		labels = new Object[NO_OF_PILES+nAg*2][NO_OF_BOXES+nAg*2+2];
 		
 		piles = new ArrayList<Stack<Box>>();
 		for (int i=0;i<NO_OF_PILES;i++)
 			piles.add(new Stack<Box>());
+		
 		loadTheShip();
+					
+		for (int i=0; i<NO_OF_CRANES*2+NO_OF_PILES; i++) 
+			add(PLATE,i,NO_OF_BOXES+NO_OF_CRANES*2+1);				
+		
+	}
+	
+	public Object getLabel(int x,int y)
+	{
+		return labels[x][y];	
 	}
 	
 	public Set<String> getCranesNames()
@@ -59,6 +82,15 @@ public class WorldModel extends GridWorldModel {
 		return lifters.get(b);
 	}
 	
+	public Vector<Crane> getLiftersOf(String bid)
+	{
+		for (Box b : lifters.keySet()) 
+			if (b.ID().equals(bid))
+				return lifters.get(b);
+		return new Vector<Crane>();
+	}
+	
+	
 	public Set<Box> getLiftBoxes()
 	{
 		return lifters.keySet();
@@ -69,14 +101,14 @@ public class WorldModel extends GridWorldModel {
 		return liftedBoxes;
 	}
 	
-	public Set<Box> getBoxesOnTop()
+	public ArrayList<Box> getBoxesOnTop()
 	{				
-		Set<Box> result = new HashSet<Box>();
-		Iterator<Stack<Box>> iter=piles.iterator();
-		
-		while(iter.hasNext())
-		{
-			Stack<Box> st =iter.next(); 
+		ArrayList<Box> result = new ArrayList<Box>();
+						
+		for (int p=0;p<NO_OF_PILES;p++)
+		{						
+			Stack<Box> st = piles.get(p);
+			
 			if (!st.empty())
 			{
 				Box top = st.peek(); //Get the box on the top			
@@ -112,18 +144,22 @@ public class WorldModel extends GridWorldModel {
 
 /* Initializes the stack */
 	public void loadTheShip()
-	{
-		int i;			
-		Iterator iter=piles.iterator();
-		while(iter.hasNext())
+	{			
+		for (int p=0;p<NO_OF_PILES;p++)
 		{			
-			Stack s = (Stack)iter.next();
-			for(i=0;i<NO_OF_BOXES;i++)
+			Stack s = piles.get(p);
+			for(int i=0;i<NO_OF_BOXES;i++)
 			{
 				int w = rnd.nextInt(3) + 1;  // Boxes with 10 & 20 & 30 lbs			
-				s.push(new Box(w*10));												
-			}
-		}
+				Box b = new Box(w*10);
+				s.push(b);
+				add(BOX,
+					NO_OF_CRANES + p,
+					NO_OF_CRANES * 2 + (10 - i));
+				
+				labels[NO_OF_CRANES + p][NO_OF_CRANES * 2 + (10 - i)] = b;								
+			}			
+		}		
 	}
 	
 	
@@ -156,8 +192,7 @@ public class WorldModel extends GridWorldModel {
 			if (!lifters.containsKey(top))											
 				lifters.put(top, new Vector<Crane>());					
 			
-			lifters.get(top).add(cranes.get(agent));
-			
+			lifters.get(top).add(cranes.get(agent));						
 			
 			for (Crane c : lifters.get(top))							
 				sumCap += c.capacity();							
@@ -166,18 +201,31 @@ public class WorldModel extends GridWorldModel {
 			
 			if (sumCap >= top.weight())
 			{								
-				iter=piles.iterator();
-				while(iter.hasNext())
-				{
-					Stack<Box> st = iter.next();
-					if (!st.empty() && st.peek().ID().equals(box))
-						liftedBoxes.add(st.pop());
-				}			
+				// update the GUI before finishing the action
+				// we need this to show single lifts 				
+				view.update();
+				try {	
+					Thread.sleep(sleep);
+				} catch (Exception e) {}
+				//							
 				
+				for (int p=0;p<NO_OF_PILES;p++)
+				{			
+					Stack<Box> st = piles.get(p);								
+					{
+						if (!st.empty() && st.peek().ID().equals(box))
+						{							
+							remove(BOX,
+									NO_OF_CRANES + p,
+									NO_OF_CRANES * 2 + (10 - st.indexOf(st.peek())));
+							liftedBoxes.add(st.pop());													
+						}
+					}
+				}			
+				view.update(); // Another update to clear the lines
 				lifters.remove(top);
 				logger.info("LIFTACT: "+ top.ID() +"  lifted by "+agent);
-				printStack();
-				
+				printStack();				
 			}
 			return true;
 		}		
@@ -187,15 +235,32 @@ public class WorldModel extends GridWorldModel {
 	/* Signin Actions */
 	public Boolean signin(String ag)  // Crane
 	{
-		//int c = (rnd.nextInt(3) + 1) * 5;	
-		int c = (rnd.nextInt(3) + 1) * 50; // made it large for testing - Pai	
-		cranes.put(ag,new Crane(ag, c));
+		int c = (rnd.nextInt(3) + 1) * 5;	
+		//int c = (rnd.nextInt(3) + 1) * 50; // made it large for testing - Pai	
+		Crane cr = new Crane(ag, c);
+		cranes.put(ag,cr);	
+		
+		
+		int k = Integer.parseInt(cr.ID().substring(5)) -1 ;
+		setAgPos(k,k,NO_OF_BOXES+NO_OF_CRANES*2);
+		labels[k][NO_OF_BOXES+NO_OF_CRANES*2] = cr;
+		view.update();
+		
 		return true;
 	}	
 	
 	public Boolean signin(String truck, String capacity)  // Truck
 	{			
-		trucks.put(truck,new Truck(truck, Integer.parseInt(capacity)));
+		Truck tr = new Truck(truck, Integer.parseInt(capacity));
+		trucks.put(truck,tr);
+		/*
+		int trn = Integer.parseInt(tr.ID().substring(5));
+		add(TRUCK,
+					NO_OF_CRANES + NO_OF_PILES+2,
+					NO_OF_CRANES * 2 + NO_OF_BOXES - trn*2 );
+				
+		labels[NO_OF_CRANES + NO_OF_PILES+2][NO_OF_CRANES * 2 + NO_OF_BOXES - trn*2] = tr;		
+		*/
 		return true;
 	}
 	
@@ -207,14 +272,14 @@ public class WorldModel extends GridWorldModel {
 		else if (ag.contains("truck"))
 			trucks.remove(ag);
 		else 
-			return false;
+			return false;		
 		return true;
 	}	
 	
 	/* moveAndDrop Action */
 	public Boolean moveAndDrop(String ag,String box, String truck)
 	{
-		//cranes.remove(ag);
+		//cranes.remove(ag);		
 		return true;
 	}
 
@@ -222,6 +287,15 @@ public class WorldModel extends GridWorldModel {
 	public Boolean truckArrive(String truck)
 	{
 		trucksOnSite.put(truck,truck);
+		
+		Truck tr = trucks.get(truck);
+		int trn = Integer.parseInt(tr.ID().substring(5));
+		add(TRUCK,
+					NO_OF_CRANES + NO_OF_PILES+2,
+					NO_OF_CRANES * 2 + NO_OF_BOXES - trn*2 );
+				
+		labels[NO_OF_CRANES + NO_OF_PILES+2][NO_OF_CRANES * 2 + NO_OF_BOXES - trn*2] = tr;		
+				
 		return true;
 	}
 
@@ -229,6 +303,14 @@ public class WorldModel extends GridWorldModel {
 	public Boolean truckLeave(String truck)
 	{
 		trucksOnSite.remove(truck);
+		
+		Truck tr = trucks.get(truck);
+		int trn = Integer.parseInt(tr.ID().substring(5));
+		remove(TRUCK,
+					NO_OF_CRANES + NO_OF_PILES+2,
+					NO_OF_CRANES * 2 + NO_OF_BOXES - trn*2 );
+					
 		return true;
-	}	
+	}
+			
 }
