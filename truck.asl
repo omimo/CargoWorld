@@ -6,27 +6,26 @@
 // haven't come to the site yet
 left.
 
-// total capacity
-truckCapacityWeight(100).
-
-// capacity left (can be negative if overweighted)
-truckAvailableWeight(100).
-
 // Signing in - added by Omid
 !init.
-+!init 
-	<-	?truckCapacityWeight(Weight);
-		signIn(Weight);truckArrive.
++!init <-
+		+truckAvailableWeight(100);	// capacity left (can be negative if overweighted)
+		+truckCapacityWeight(100); // total capacity
+		signIn(100);truckArrive.
 
 //-------------------------------
 //	Incoming messages
 //-------------------------------
 
 +tellCapacity[source(Sender)]
-	<-	.send(Sender,tell,truckCapacityWeight(_self, A)).
+	<-	?truckAvailableWeight(A);
+		.send(Sender,tell,truckCapacityWeight(A)).
 	
 +tellAvailable[source(Sender)]
-	<-	.send(Sender,tell,truckAvailableWeight(_self, A)).
+	<-	.print("msgRecv");
+		+beingAsked(Sender);
+		?truckAvailableWeight(A);
+		.send(Sender,tell,truckAvailableWeight(A)).
 	
 // tell me to come to site
 +come[source(Sender)]
@@ -37,14 +36,19 @@ truckAvailableWeight(100).
 // tell me to leave the site
 +!leave[source(Sender)]
 	<-	!leave(source(Sender)).
+	
++!kqml_received(Crane,tell,move(_,Box,Me),_) : beingAsked(Crane)
+	<-	?weight(BoxName, Weight);
+		-beingAsked(_);
+		!load(BoxName, Weight, Crane).
 
 //-------------------------------
 //	Communication with Env
 //-------------------------------
 
 // listen to the environment and move box to this truck
-//+!move(Crane, BoxName, _self) : .my_name(Name)
-//	<-	weight(BoxName, Weight);
+//+!move(Crane, BoxName, Name) : .my_name(Name)
+//	<-	?weight(BoxName, Weight);
 //		!load(BoxName, Weight, Crane).
 	
 //-------------------------------
