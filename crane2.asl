@@ -8,8 +8,8 @@ truckMinWeight(5).
 	.print("bye...").
 	
 +!clearAll: onTop(Box) <- !clear; !clearAll.
-+!clearAll.
--!clearAll <- .print("clear failed... continuing"); !clearAll.
+//+!clearAll.
+-!clearAll <- !clearAll.
 
 //-------------------------------------
 // update box info so that I can continue to work on other boxes
@@ -31,7 +31,8 @@ truckMinWeight(5).
 // try lifting
 +!clear: 
 	not workingOn(_) &
-	onTop(Box)
+	onTop(Box) & 
+	not lifted(Box)
 	<-	
 	.print("clear-lift");
 		!lifting.
@@ -41,33 +42,37 @@ truckMinWeight(5).
 	workingOn(BoxA) &
 	lifted(BoxA)
 	<-	
-	.print("clear-post-lift");
 		!boxLifted(BoxA).
 
 // nothing to do in this cycle. wait
 +!clear: onTop(_).
+
++!clear
+	<-.print("???????? No more boxes?").
 	
 
 		
 //-------------------------------------
 // lift heavy box that is under my's capacity
 +!lifting:
-	capacity(_self,Capacity) &
+	.my_name(Name) &
+	capacity(Name,Capacity) &
 	onTop(BoxA) &
 	onTop(BoxB) &
 	weight(BoxA,WeightA) &
 	weight(BoxB,WeightB) &
-	WeightA >= WeightB &
+	WeightA <= WeightB &
 	WeightA <= Capacity
 	<-	
-	.print("lifting-2box");
+	.print("lifting-2box");.print(Capacity);.print(BoxA);.print(WeightA);
 		+workingOn(BoxA);
 		+waitToMove(BoxA);
 		lift(BoxA).
 
 // lift any box that is under my capacity
 +!lifting:
-	capacity(_self,Capacity) &
+	.my_name(Name) &
+	capacity(Name,Capacity) &
 	onTop(BoxA) &
 	weight(BoxA,WeightA) &
 	WeightA <= Capacity
@@ -91,40 +96,51 @@ truckMinWeight(5).
 // box I was working on got lifted
 
 // I'm the first lifter / select truck
-+!boxLifted(BoxA) : waitToMove(BoxA) &
-	onSite(Truck) &
-	askTruckCapacity(Truck) &
-	truckAvailable(Truck, AvailableWeight) &
-	weight(Box, BoxWeight) &
-	BoxWeight <= AvailableWeight
-	<-	
-	.print("postLift-mover");
-		!moving(Box, Truck).
++!boxLifted(BoxA) : not truckTalked
+<- 
+	?waitToMove(BoxA);
+	?onSite(Truck);
+	+truckTalked;
+	!askTruckCapacity(Truck).
+
+//+!boxLifted(BoxA) <- 
+//.print("postLift-mover-7");
+//	!truckAvailableWeight(AvailableWeight);
+//.print(AvailableWeight).
 
 // Other lifters waits
-+!boxLifted(BoxA) <-
-	.print("postLift-helper").
++!boxLifted(BoxA).
 
 +!askTruckCapacity(Truck)
 	<-	
-	.print("postLift-capacity?");
-		?truckAvailable(Truck, AvailableWeight).
+		.send(Truck,tell,tellAvailable).
 		
++!kqml_received(Truck,tell,truckAvailableWeight(AvailableWeight),_) 
+	<-
+.print("got truck info");
+	+truckAvailableWeight(Truck, AvailableWeight);
+.print(Box);
+	?weight(Box, BoxWeight);
+.print(BoxWeight);
+	?(BoxWeight <= AvailableWeight);
+	!moving(Box, Truck).
 
 //-------------------------------------
 // moving box to truck
-+!moving(Box, Truck) : not onSite(Truck)
++!moving(Box, Truck) : not onSite(Truck) & .my_name(Name)
 	<-	
 	.print("move-!onSite");
-		.send(Truck, tell, move(_self, Box, Truck));
 		.send(Truck, tell, come);
-		moveAndDrop(Box, Truck).
+		.send(Truck, tell, move(Name, Box, Truck));
+		moveAndDrop(Box, Truck);
+		.print("shouldOnTruck").
 		
-+!moving(Box, Truck)
++!moving(Box, Truck) : .my_name(Name)
 	<-	
 	.print("move-onSite");
-		.send(Truck, tell, move(_self, Box, Truck));
-		moveAndDrop(Box, Truck).
+		.send(Truck, tell, move(Name, Box, Truck));
+		moveAndDrop(Box, Truck);
+		.print("shouldOnTruck").
 	
 
 
@@ -158,12 +174,16 @@ truckMinWeight(5).
 	truckAvailableWeight(Truck, Weight) &
 	truckMinWeight(MinWeight) &
 	MinWeight >= Weight
-	<-	.send(Truck, tell, leave);
+	<-	.print("reset");
+		.send(Truck, tell, leave);
 		-waitToMove(Box);
-		-workingOn(Box).
+		-workingOn(Box);
+		-truckTalked.
 
 +!reset(Box) : waitToMove(Box)	
 	<-	-waitToMove(Box);
+		-truckTalked;
 		-workingOn(Box).
 +!reset
-	<-	-workingOn(Box).
+	<-	-workingOn(Box);
+		-truckTalked.
