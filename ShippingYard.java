@@ -118,6 +118,9 @@ public class ShippingYard extends Environment {
 		for (String t : model.getTrucksOnSite()) // onSite(TruckID)
 		{			
 			addPercept(Literal.parseLiteral("onSite("+t+")"));
+			
+			for (Box b : model.getBoxesOnTruck(t))
+				addPercept(Literal.parseLiteral("onTruck("+b.ID()+")"));
 		}
 	
 		for (Box b : model.getLiftBoxes())  // Who is lifting what! 

@@ -25,6 +25,7 @@ public class WorldModel extends GridWorldModel {
 	
 	private HashMap<String,Truck> trucks = new HashMap<String,Truck>();
 	private HashMap<String,String> trucksOnSite = new HashMap<String,String>();
+	private HashMap<String,Vector<Box>> boxesOnTruck = new HashMap<String,Vector<Box>>();
 	
 	private Logger logger = Logger.getLogger("CargoWorld.mas2j."+ShippingYard.class.getName());		
 	
@@ -90,6 +91,13 @@ public class WorldModel extends GridWorldModel {
 		return new Vector<Crane>();
 	}
 	
+	public Vector<Box> getBoxesOnTruck(String truck)
+	{
+		if (boxesOnTruck.containsKey(truck))
+			return boxesOnTruck.get(truck);
+		else
+			return new Vector<Box>();
+	}
 	
 	public Set<Box> getLiftBoxes()
 	{
@@ -155,9 +163,9 @@ public class WorldModel extends GridWorldModel {
 				s.push(b);
 				add(BOX,
 					NO_OF_CRANES + p,
-					NO_OF_CRANES * 2 + (10 - i));
+					NO_OF_CRANES * 2 + (NO_OF_BOXES - i));
 				
-				labels[NO_OF_CRANES + p][NO_OF_CRANES * 2 + (10 - i)] = b;								
+				labels[NO_OF_CRANES + p][NO_OF_CRANES * 2 + (NO_OF_BOXES - i)] = b;								
 			}			
 		}		
 	}
@@ -217,12 +225,12 @@ public class WorldModel extends GridWorldModel {
 						{							
 							remove(BOX,
 									NO_OF_CRANES + p,
-									NO_OF_CRANES * 2 + (10 - st.indexOf(st.peek())));
+									NO_OF_CRANES * 2 + (NO_OF_BOXES - st.indexOf(st.peek())));
 							liftedBoxes.add(st.pop());													
 						}
 					}
 				}			
-				view.update(); // Another update to clear the lines
+				view.update(); // Another update to clear the lines,
 				lifters.remove(top);
 				logger.info("LIFTACT: "+ top.ID() +"  lifted by "+agent);
 				printStack();				
@@ -279,7 +287,17 @@ public class WorldModel extends GridWorldModel {
 	/* moveAndDrop Action */
 	public Boolean moveAndDrop(String ag,String box, String truck)
 	{
-		//cranes.remove(ag);		
+		if (!boxesOnTruck.containsKey(truck))											
+				boxesOnTruck.put(truck, new Vector<Box>());						
+		
+		Box theBox = new Box(0);
+		
+		for(Box b : getBoxesOnTop())
+			if (b.ID().equals(box)) 
+				theBox = b;				
+		
+		boxesOnTruck.get(truck).add(theBox);
+		
 		return true;
 	}
 
@@ -309,7 +327,9 @@ public class WorldModel extends GridWorldModel {
 		remove(TRUCK,
 					NO_OF_CRANES + NO_OF_PILES+2,
 					NO_OF_CRANES * 2 + NO_OF_BOXES - trn*2 );
-					
+
+		boxesOnTruck.remove(truck);
+		
 		return true;
 	}
 			
