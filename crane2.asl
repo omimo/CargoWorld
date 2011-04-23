@@ -1,12 +1,9 @@
-// tell truck leave if availble weight is below this
-truckMinWeight(5).
-
 !init.
 +!init <- 
 	signIn;
 	!clearAll;
 	.print("bye...").
-	
+
 +!clearAll: onTop(Box) <- !clear; !clearAll.
 //+!clearAll.
 -!clearAll <- !clearAll.
@@ -17,15 +14,15 @@ truckMinWeight(5).
 	workingOn(Box) &
 	onTruck(Box)
 	<-	
-	.print("clear-update");
-		reset(Box).
+		.print("clear-update");
+		!reset(Box).
 
 // see if I can help someone
 +!clear:
 	not workingOn(_) &
 	helpWith(Box)
 	<-
-	.print("clear-help");
+		.print("clear-help");
 		!helpWith(Box).
 
 // try lifting
@@ -34,7 +31,7 @@ truckMinWeight(5).
 	onTop(Box) & 
 	not lifted(Box)
 	<-	
-	.print("clear-lift");
+		.print("clear-lift");
 		!lifting.
 
 // after lifted (will continue to work after box loaded on truck)
@@ -49,16 +46,17 @@ truckMinWeight(5).
 
 +!clear
 	<-.print("???????? No more boxes?").
-	
 
-		
+
 //-------------------------------------
-// lift heavy box that is under my's capacity
+// lift light box that is under my's capacity
+
 +!lifting:
 	.my_name(Name) &
 	capacity(Name,Capacity) &
 	onTop(BoxA) &
 	onTop(BoxB) &
+	not (BoxA == BoxB) &
 	weight(BoxA,WeightA) &
 	weight(BoxB,WeightB) &
 	WeightA <= WeightB &
@@ -67,7 +65,7 @@ truckMinWeight(5).
 	.print("lifting-2box");.print(Capacity);.print(BoxA);.print(WeightA);
 		+workingOn(BoxA);
 		+waitToMove(BoxA);
-		lift(BoxA).
+		 lift(BoxA).
 
 // lift any box that is under my capacity
 +!lifting:
@@ -80,69 +78,49 @@ truckMinWeight(5).
 	.print("lifting-1box");
 		+workingOn(BoxA);
 		+waitToMove(BoxA);
-		lift(BoxA).
+		 lift(BoxA).
 
 // ask other's help
 +!lifting: onTop(Box) 
 	<-	
 	.print("lifting-help");
 		+workingOn(BoxA);
-		lift(Box);
+		 lift(Box);
 		.broadcast(tell, helpWith(Box)).
-
-
 
 //-------------------------------------
 // box I was working on got lifted
 
 // I'm the first lifter / select truck
-+!boxLifted(BoxA) : not truckTalked
-<- 
-	?waitToMove(BoxA);
-	?onSite(Truck);
-	+truckTalked;
-	!askTruckCapacity(Truck).
-
-//+!boxLifted(BoxA) <- 
-//.print("postLift-mover-7");
-//	!truckAvailableWeight(AvailableWeight);
-//.print(AvailableWeight).
-
++!boxLifted(Box) :
+	waitToMove(Box)  &
+	onSite(Truck) &
+	truck(Truck, AvailableWeight) &
+	weight(Box, BoxWeight) &
+	AvailableWeight >= BoxWeight
+		<- 
+			!moving(Box, Truck).
+	
 // Other lifters waits
 +!boxLifted(BoxA).
 
-+!askTruckCapacity(Truck)
-	<-	
-		.send(Truck,tell,tellAvailable).
-		
+//-------------------------------------
+//Incoming Messages
+//-------------------------------------
+
 +!kqml_received(Truck,tell,truckAvailableWeight(AvailableWeight),_) 
 	<-
-.print("got truck info");
-	+truckAvailableWeight(Truck, AvailableWeight);
-.print(Box);
-	?weight(Box, BoxWeight);
-.print(BoxWeight);
-	?(BoxWeight <= AvailableWeight);
-	!moving(Box, Truck).
+		-truck(Truck, _);
+		+truck(Truck, AvailableWeight).
 
 //-------------------------------------
 // moving box to truck
-+!moving(Box, Truck) : not onSite(Truck) & .my_name(Name)
++!moving(Box, Truck) : onSite(Truck)
 	<-	
+	.my_name(Name);
 	.print("move-!onSite");
-		.send(Truck, tell, come);
 		.send(Truck, tell, move(Name, Box, Truck));
-		moveAndDrop(Box, Truck);
-		.print("shouldOnTruck").
-		
-+!moving(Box, Truck) : .my_name(Name)
-	<-	
-	.print("move-onSite");
-		.send(Truck, tell, move(Name, Box, Truck));
-		moveAndDrop(Box, Truck);
-		.print("shouldOnTruck").
-	
-
+		 moveAndDrop(Box, Truck);
 
 //-------------------------------------
 // others need help
@@ -155,10 +133,10 @@ truckMinWeight(5).
 	.print("help-availble");
 		-helpWith(Box);
 		+workingOn(Box);
-		lift(Box).
-		
+		 lift(Box).
+
 // I'm busy. Offer help later
-+!helpWith(Box)[source(Agent)]
++!helpWith(Box)
 	<-
 	.print("help-busy").
 
@@ -166,24 +144,7 @@ truckMinWeight(5).
 //-------------------------------------
 // reset the crane and move on
 
-//tell truck to leave
 +!reset(Box) : 
-	waitToMove(Box) &
-	onSite(Truck) &
-	askTruckCapacity(Truck) &
-	truckAvailableWeight(Truck, Weight) &
-	truckMinWeight(MinWeight) &
-	MinWeight >= Weight
 	<-	.print("reset");
-		.send(Truck, tell, leave);
 		-waitToMove(Box);
-		-workingOn(Box);
-		-truckTalked.
-
-+!reset(Box) : waitToMove(Box)	
-	<-	-waitToMove(Box);
-		-truckTalked;
 		-workingOn(Box).
-+!reset
-	<-	-workingOn(Box);
-		-truckTalked.
