@@ -1,84 +1,75 @@
 //TODO: handle overweight situation
+//truckArrive
+//truckLeave
 
+// total capacity (not being used)
+truckCapacityWeight(100).
 
-
-
-// haven't come to the site yet
-left.
+// capacity left (can be negative if overweighted)
+truckAvailableWeight(100).
 
 // Signing in - added by Omid
 !init.
-+!init <-
-		+truckAvailableWeight(100);	// capacity left (can be negative if overweighted)
-		+truckCapacityWeight(100); // total capacity
-		signIn(100);truckArrive.
-
-//-------------------------------
-//	Incoming messages
-//-------------------------------
-
-+tellCapacity[source(Sender)]
-	<-	?truckAvailableWeight(A);
-		.send(Sender,tell,truckCapacityWeight(A)).
-	
-+tellAvailable[source(Sender)]
-	<-	.print("msgRecv");
-		+beingAsked(Sender);
++!init 
+	<-	?truckCapacityWeight(Weight);
+		 signIn(Weight);
 		?truckAvailableWeight(A);
-		.send(Sender,tell,truckAvailableWeight(A)).
-	
-// tell me to come to site
-+come[source(Sender)]
-	<-	+free;
-		-left;
-		.send(Sender,tell,came).
-
-// tell me to leave the site
-+!leave[source(Sender)]
-	<-	!leave(source(Sender)).
-	
-+!kqml_received(Crane,tell,move(_,Box,Me),_) : beingAsked(Crane)
+		+free;
+		 truckArrive;
+		.broadcast(tell, truckAvailableCapacity(A)).
+		
+//-------------------------------
+//	Incoming Messages
+//-------------------------------		
+		 
++!kqml_received(Crane,tell,move(_,Box,Me),_)
 	<-	?weight(BoxName, Weight);
-		-beingAsked(_);
 		!load(BoxName, Weight, Crane).
-
-//-------------------------------
-//	Communication with Env
-//-------------------------------
-
-// listen to the environment and move box to this truck
-//+!move(Crane, BoxName, Name) : .my_name(Name)
-//	<-	?weight(BoxName, Weight);
-//		!load(BoxName, Weight, Crane).
-	
+		
 //-------------------------------
 //	Plans
 //-------------------------------
 
-+!leave(Sender) : truckAvailableWeight(N) & N < 0
-	<-	.send(Sender,tell,overweight).
-	
-+!leave(Sender) : true
-	<-	+left;
-		-free;
-		.send(Sender,tell,leaveAccepted).
++!leave : truckAvailableWeight(A) & A <= 0
+	<-	.broadcast(tell,overloaded(A * (-1))).
 
++!leave : 
+	onTop(Box) &
+	weight(Box,Weight) &
+	truckAvailableWeight(A) &
+	Weight <= A
+	<-	-free;
+		 truckLeave;
+		 truckArrive.
+		
++!leave : 
+	lifted(Box) &
+	weight(Box,Weight) &
+	truckAvailableWeight(A) &
+	Weight <= A
+	<-	-free;
+		 truckLeave;
+		 truckArrive.
+		
++!leave : 
+	onTop(Box) &
+	weight(Box,Weight) &
+	truckAvailableWeight(A) &
+	Weight <= A
+	<-	-free;
+		 truckLeave;
+		 truckArrive.
 
-+!load(Box, Weight, Sender) : not free
-	<-	true.
-//	<-	.send(Sender, tell, busy).	// removed because it seems impossible to happen
-
-+!load(Box, Weight, Sender) : true
++!load(Box, Weight, Sender) : free
 	<-	-truckAvailableWeight(N);
 		+truckAvailableWeight(N - Weight);
-		+loaded(Box, Weight).
-//		.send(Sender, tell, loadSuccessful(Box)).	// removed because it seems impossible to happen
+		.broadcast(tell, truckAvailableCapacity(N - Weight));
+		+loaded(Box, Weight)
+		!leave.
 		
-		
- +!unload(Box, Sender) : not free
-	<-	.send(Sender, tell, busy).
-		
- +!unload(Box, Sender) : true
-	<-	loaded(Box,Weight);
++!unload(Box) : free
+	<-	?loaded(Box,Weight);
 		-truckAvailableWeight(N);
-		+truckAvailableWeight(N + Weight).
+		+truckAvailableWeight(N + Weight);
+		.broadcast(tell, truckAvailableCapacity(N + Weight)).
+		
